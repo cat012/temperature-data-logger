@@ -15,6 +15,8 @@
 
 
 #define LOG_DATA_SIZE  2048
+#define LOG_PERIOD_1   1
+#define LOG_PERIOD_2   60
 
 
 uint8_t trmdata[3]; //ds18b20 data
@@ -26,6 +28,7 @@ char strbuff[8];
 
 uint8_t scrupd=0;
 
+uint8_t logperiod=LOG_PERIOD_2;
 uint8_t logen=0;
 uint8_t logstart=0;
 uint8_t logstop=0;
@@ -121,7 +124,7 @@ static inline void log_cont(void)
         t=(trmdata[1]*10)+trmdata[2];
         if(trmdata[0]) t=-t;
 
-        if(++logtmr>59)
+        if(++logtmr>=logperiod)
             {
             logtmr=0;
             if(logcnt>=(LOG_DATA_SIZE-2))
@@ -263,7 +266,7 @@ void main(void)
     //SBOREN=1;
 
     uint8_t stage=0;
-    uint8_t sysmode=0;
+    uint8_t smode=0;
 
     for(;;)
         {
@@ -299,7 +302,7 @@ void main(void)
             {
             scrupd=0;
 
-            if(sysmode==0)
+            if(smode==0)
                 {
                 led_dot(0,trmdata[0]);
                 led_dot(1,trmdata[2]>=5);
@@ -307,31 +310,40 @@ void main(void)
                 led_print(0,strbuff);
                 }
 
-            if(sysmode==1)
+            if(smode==1)
                 {
-                led_dot(0,0);
                 led_dot(1,0);
                 if((logen || logstart) && !logstop) led_print(0,(char*)"L-");
                 else led_print(0,(char*)"L ");
                 }
 
-            if(sysmode==2)
+            if(smode==2)
                 {
-                if((txen || txstart) && !txstop) led_print(0,(char*)"U-");
-                else led_print(0,(char*)"U ");
+                if((txen || txstart) && !txstop) led_print(0,(char*)"u-");
+                else led_print(0,(char*)"u ");
+                }
+
+            if(smode==10)
+                {
+                led_dot(1,0);
+                sprintf(strbuff,"%2u",logperiod);
+                led_print(0,strbuff);
                 }
             }
             switch(button_check())
                 {
                 case 2:
-                    if(sysmode==1) { scrupd=1; logen ? logstop=1 : logstart=1; break; }
-                    if(sysmode==2) { scrupd=1; txen ? txstop=1 : txstart=1; break; }
+                    if(smode==0) { smode=10; scrupd=1; break; }
+                    if(smode==1) { scrupd=1; logen ? logstop=1 : logstart=1; break; }
+                    if(smode==2) { scrupd=1; txen ? txstop=1 : txstart=1; break; }
+                    if(smode==10) { smode=0; scrupd=1; break; }
                     break;
 
                 case 1:
-                    if(sysmode==0) { sysmode++; scrupd=1; break; }
-                    if(sysmode==1) { sysmode++; scrupd=1; break; }
-                    if(sysmode==2) { sysmode=0; scrupd=1; break; }
+                    if(smode==0) { smode++; scrupd=1; break; }
+                    if(smode==1) { smode++; scrupd=1; break; }
+                    if(smode==2) { smode=0; scrupd=1; break; }
+                    if(smode==10) { if(logperiod==LOG_PERIOD_1) logperiod=LOG_PERIOD_2; else logperiod=LOG_PERIOD_1;  scrupd=1; break; };
 
                     break;
 

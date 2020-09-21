@@ -8,13 +8,13 @@ x = np.arange(1, l)
 
 fig, ax = plt.subplots()
 
-ax.stackplot(x,y,color='mediumslateblue')
+ax.stackplot(x, y/10, color='mediumslateblue')
 
 ax.xaxis.set_major_locator(ticker.MultipleLocator(60))
 ax.xaxis.set_minor_locator(ticker.MultipleLocator(10))
-
-ax.yaxis.set_major_locator(ticker.MultipleLocator(100))
-ax.yaxis.set_minor_locator(ticker.MultipleLocator(10))
+    
+ax.yaxis.set_major_locator(ticker.MultipleLocator(10))
+ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
 
 ax.grid(which='major', color = 'lightgray', linestyle = '-', linewidth=0.5)
 ax.grid(which='minor', color = 'lightgray', linestyle = '-', linewidth=0.2)
@@ -28,4 +28,5 @@ fig.set_figwidth(9)
 fig.set_figheight(5)
 
 plt.show()
+
 

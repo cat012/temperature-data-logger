@@ -1,4 +1,3 @@
-
 import serial
 
 fconfig = open('config.txt', 'r')
@@ -35,3 +34,5 @@ while cnt<20:
 ser.close()
 fresult.close()
 fconfig.close()
+
+
