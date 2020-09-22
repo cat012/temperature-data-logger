@@ -1,5 +1,5 @@
 // main.c
-// 18-Aug-2020
+// 21-Sep-2020
 
 
 #include <stdio.h>
@@ -17,6 +17,7 @@
 #define LOG_DATA_SIZE  2048
 #define LOG_PERIOD_1   1
 #define LOG_PERIOD_2   60
+#define LOG_PERIOD_3   3600
 
 
 uint8_t trmdata[3]; //ds18b20 data
@@ -28,7 +29,7 @@ char strbuff[8];
 
 uint8_t scrupd=0;
 
-uint8_t logperiod=LOG_PERIOD_2;
+uint16_t logperiod=LOG_PERIOD_2;
 uint8_t logen=0;
 uint8_t logstart=0;
 uint8_t logstop=0;
@@ -98,14 +99,20 @@ void __interrupt isr_high(void)
 //-----------------------------------------------------------------------------
 static inline void log_cont(void)
     {
-    static uint8_t logtmr=0;
+    static uint16_t logtmr=0;
     static uint16_t logcnt=0;
+    int16_t logdata=0;
+
+    logdata=(trmdata[1]*10)+trmdata[2];
+    if(trmdata[0]) logdata=-logdata;
 
     if(logstart)
         {
         logstart=0;
         logen=1;
         logcnt=0;
+        ee_write16(logcnt, logdata);
+        logcnt+=2;
         logtmr=0;
         }
 
@@ -119,11 +126,6 @@ static inline void log_cont(void)
 
     if(logen)
         {
-        int16_t t=0;
-
-        t=(trmdata[1]*10)+trmdata[2];
-        if(trmdata[0]) t=-t;
-
         if(++logtmr>=logperiod)
             {
             logtmr=0;
@@ -135,7 +137,7 @@ static inline void log_cont(void)
                 }
             else
                 {
-                ee_write16(logcnt, t);
+                ee_write16(logcnt, logdata);
                 logcnt+=2;
                 }
             }
@@ -187,7 +189,8 @@ static inline void tx_cont(void)
                 {
                 txcnt=0;
                 txen=0;
-                uart_print("2003"); uart_deinit();
+                uart_print("2003");
+                uart_deinit();
                 }
             }
         }
@@ -260,11 +263,21 @@ void main(void)
     UPIN_ALL_INIT;
 
     i2c_init();
-
-    //SBOREN=0;
-    //ee_clear();
-    //SBOREN=1;
-
+/*
+    __delay_ms(50);
+    __delay_ms(50);
+    __delay_ms(50);
+    __delay_ms(50);
+    __delay_ms(50);
+    __delay_ms(50);
+    __delay_ms(50);
+    __delay_ms(50);
+    __delay_ms(50);
+    __delay_ms(50);
+    SBOREN=0;
+    ee_clear();
+    SBOREN=1;
+*/
     uint8_t stage=0;
     uint8_t smode=0;
 
@@ -326,10 +339,15 @@ void main(void)
             if(smode==10)
                 {
                 led_dot(1,0);
-                sprintf(strbuff,"%2u",logperiod);
-                led_print(0,strbuff);
+                if(logperiod==LOG_PERIOD_3) led_print(0,"1h");
+                else
+                    {
+                    sprintf(strbuff,"%2u",logperiod);
+                    led_print(0,strbuff);
+                    }
                 }
             }
+
             switch(button_check())
                 {
                 case 2:
@@ -343,8 +361,14 @@ void main(void)
                     if(smode==0) { smode++; scrupd=1; break; }
                     if(smode==1) { smode++; scrupd=1; break; }
                     if(smode==2) { smode=0; scrupd=1; break; }
-                    if(smode==10) { if(logperiod==LOG_PERIOD_1) logperiod=LOG_PERIOD_2; else logperiod=LOG_PERIOD_1;  scrupd=1; break; };
-
+                    if(smode==10)
+                        {
+                        if(logperiod==LOG_PERIOD_1) logperiod=LOG_PERIOD_2;
+                        else if(logperiod==LOG_PERIOD_2) logperiod=LOG_PERIOD_3;
+                        else if(logperiod==LOG_PERIOD_3) logperiod=LOG_PERIOD_1;
+                        scrupd=1;
+                        break;
+                        };
                     break;
 
                 case 0: break;

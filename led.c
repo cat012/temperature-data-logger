@@ -28,7 +28,9 @@ const uint8_t scode[] = //codes of symbols //segments: a-b-c-d-e-f-g-h
   0b00000010, //11 //-
   0b00011100, //12 //L
   0b01111100, //13 //U
-  0b00111000 //14 //u
+  0b00111000, //14 //u
+  0b01101110, //15 //H
+  0b00101110  //16 //h
 };
 
 
@@ -77,6 +79,8 @@ void led_char(uint8_t pos, uint8_t sign) //print a character
         case 76: tmp=scode[12]; break; //"L"
         case 85: tmp=scode[13]; break; //"U"
         case 117: tmp=scode[14]; break; //"u"
+        case 72: tmp=scode[15]; break; //"H"
+        case 104: tmp=scode[16]; break; //"h"
         }
 
     if(pos<=1) ledbuff[pos]=(tmp|(ledbuff[pos]&0b00000001));
