@@ -310,6 +310,7 @@ void main(void)
 
             if(smode==1)
                 {
+                led_dot(0,0);
                 led_dot(1,0);
                 if((logen || logstart) && !logstop) led_print(0,(char*)"L-");
                 else led_print(0,(char*)"L ");
@@ -323,6 +324,7 @@ void main(void)
 
             if(smode==10)
                 {
+                led_dot(0,0);
                 led_dot(1,0);
                 if(logperiod==LOG_PERIOD_3) led_print(0,"1h");
                 else
