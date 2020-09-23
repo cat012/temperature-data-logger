@@ -90,7 +90,6 @@ void __interrupt isr_high(void)
         TMR3IF=0;
         TMR3=TMR3_OVF_PRELOAD;
 
-        //UART_TX_LAT=!UART_TX_LAT;
         uart_cont();
         }
     }
@@ -263,21 +262,7 @@ void main(void)
     UPIN_ALL_INIT;
 
     i2c_init();
-/*
-    __delay_ms(50);
-    __delay_ms(50);
-    __delay_ms(50);
-    __delay_ms(50);
-    __delay_ms(50);
-    __delay_ms(50);
-    __delay_ms(50);
-    __delay_ms(50);
-    __delay_ms(50);
-    __delay_ms(50);
-    SBOREN=0;
-    ee_clear();
-    SBOREN=1;
-*/
+
     uint8_t stage=0;
     uint8_t smode=0;
 
