@@ -61,11 +61,6 @@ void tmr_uart_stop(void)
 //=============================================================================
 void __interrupt isr_high(void)
     {
-    if(INT0IF && INT0IE) // external interrupt 0 - pulse from Geiger detector
-        {
-        INT0IF=0;
-        }
-
     if(TMR0IF && TMR0IE)  //timer0 overflow - 100Hz ticks
         {
         TMR0IF=0;
